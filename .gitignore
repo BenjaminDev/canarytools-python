@@ -11,4 +11,8 @@ __pycache__/
 *.eggs
 .DS_Store
 .idea
-canarytools-env
+coverage_html/*
+.vscode/*
+tests/data/*
+cli.py
+.coverage

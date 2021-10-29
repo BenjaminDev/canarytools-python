@@ -1,0 +1,7 @@
+site_name: Canarytools
+theme:
+  name: material
+
+plugins:
+- search
+- mkdocstrings

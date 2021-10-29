@@ -1,62 +1,67 @@
-class ConsoleError(Exception):
-    """Ambiguous exception occurred while using the Console API."""
-    def __init__(self, *args, **kwargs):
-        """
+# class ConsoleError(Exception):
+#     """Ambiguous exception occurred while using the Console API."""
 
-        :param args:
-        :param kwargs:
-        """
-        super(ConsoleError, self).__init__(*args, **kwargs)
+#     def __init__(self, *args, **kwargs):
+#         """
 
-    def __str__(self):
-        if len(self.args) > 0:
-            return self.args[0]
-        else:
-            return "To our eternal shame... Something went wrong. Sorry."
+#         :param args:
+#         :param kwargs:
+#         """
+#         super(ConsoleError, self).__init__(*args, **kwargs)
 
-
-class ConfigurationError(ConsoleError):
-    """Configuration missing"""
+#     def __str__(self):
+#         if len(self.args) > 0:
+#             return self.args[0]
+#         else:
+#             return "To our eternal shame... Something went wrong. Sorry."
 
 
-class InvalidAuthTokenError(ConsoleError):
-    """Invalid Authorization Token"""
-    def __str__(self):
-        return "Invalid Authorization Token"
+# class ConfigurationError(ConsoleError):
+#     """Configuration missing"""
 
 
-class ConnectionError(ConsoleError):
-    """Connection error occurred"""
+# class InvalidAuthTokenError(ConsoleError):
+#     """Invalid Authorization Token"""
+
+#     def __str__(self):
+#         return "Invalid Authorization Token"
 
 
-class DeviceNotFoundError(ConsoleError):
-    """Device could not be found"""
-    """Invalid Authorization Token"""
-    def __str__(self):
-        return "Device could not be found"
+# class ConnectionError(ConsoleError):
+#     """Connection error occurred"""
 
 
-class IncidentNotFoundError(ConsoleError):
-    """Incident not found"""
-    def __str__(self):
-        return "Incident could not be found. It may have been deleted."
+# class DeviceNotFoundError(ConsoleError):
+#     """Device could not be found"""
+
+#     """Invalid Authorization Token"""
+
+#     def __str__(self):
+#         return "Device could not be found"
 
 
-class InvalidParameterError(ConsoleError):
-    """Invalid parameter(s)"""
+# class IncidentNotFoundError(ConsoleError):
+#     """Incident not found"""
+
+#     def __str__(self):
+#         return "Incident could not be found. It may have been deleted."
 
 
-class UpdateError(ConsoleError):
-    """Update not permitted"""
+# class InvalidParameterError(ConsoleError):
+#     """Invalid parameter(s)"""
 
 
-class FileNotFound(ConsoleError):
-    """File not found"""
+# class UpdateError(ConsoleError):
+#     """Update not permitted"""
 
 
-class CanaryTokenError(ConsoleError):
-    """Something went wrong while calling the tokens API"""
+# class FileNotFound(ConsoleError):
+#     """File not found"""
 
 
-class IncidentError(ConsoleError):
-    """Something went wrong while working with Incidents"""
+# class CanaryTokenError(ConsoleError):
+#     """Something went wrong while calling the tokens API"""
+
+
+# class IncidentError(ConsoleError):
+#     """Something went wrong while working with Incidents"""
