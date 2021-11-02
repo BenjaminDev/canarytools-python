@@ -1,5 +1,6 @@
 import os
 import pickle
+from itertools import product
 from pathlib import Path
 from typing import Union
 
@@ -11,14 +12,11 @@ from canarytools.console import (API, Console, ConsoleSettings, Devices,
                                  IncidentQueries)
 from canarytools.models.base import (APIError, AuthToken, Incidents,
                                      MDeviceIPs, MDevices, MDeviceTxTIPs,
-                                     QDeviceIPs, QDevices, QDevicesInfo, Query,
+                                     QDeviceIPs, QDevices, QDevicesInfo,
+                                     QIncidentAction, Query, SingleIncident,
                                      api_auth_token_length)
-from itertools import product
-
 
 from .conftest import has_key
-
-
 
 # def hash_request(**kwargs):
 #     # TODO: if this sticks around make it nicer please >:<
@@ -188,8 +186,6 @@ def test_console_device_get_filter_broken_url(console: Console):
     assert isinstance(devices_all, APIError)
 
 
-
-
 @pytest.mark.skipif(has_key(), reason="Don't have a valid api key.")
 # TODO: use hypothesis for to improve input coverage.
 @pytest.mark.parametrize(
@@ -215,3 +211,17 @@ def test_console_device_get_ips(download, include_annotations, console: Console)
         device_ips: MDeviceTxTIPs = console.devices.ips(query=query)
     else:
         devices_ips: MDeviceIPs = console.devices.ips(query=query)
+
+
+def test_console_incidents_fetch_invalid_incident(console: Console):
+    query = QIncidentAction(incident="None")
+    incident = console.incidents_act.fetch(query)
+    assert isinstance(incident, APIError)
+
+
+def test_console_incidents_fetch_valid_incident(console: Console):
+    incidents: Incidents = console.incidents.all(query=Query())
+    hash_id = incidents.incidents[0].hash_id
+    query = QIncidentAction(hash_id=hash_id)
+    incident = console.incidents_act.fetch(query)
+    assert isinstance(incident, SingleIncident)

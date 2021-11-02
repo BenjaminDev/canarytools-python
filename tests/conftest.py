@@ -1,13 +1,14 @@
-
+import hashlib
 import os
 import pickle
+from functools import wraps
+from itertools import product
 from pathlib import Path
 from typing import Union
-import hashlib
-from functools import wraps
+
 import httpx
 import pytest
-from functools import wraps
+
 from canarytools.api import base_url
 from canarytools.console import (API, Console, ConsoleSettings, Devices,
                                  IncidentQueries)
@@ -15,10 +16,11 @@ from canarytools.models.base import (APIError, AuthToken, Incidents,
                                      MDeviceIPs, MDevices, MDeviceTxTIPs,
                                      QDeviceIPs, QDevices, QDevicesInfo, Query,
                                      api_auth_token_length)
-from itertools import product
 
 replay_data_path = Path("tests/data")
 has_key = lambda: not len(os.environ["API_KEY"]) == api_auth_token_length
+
+
 def hash_request(**kwargs):
     # TODO: if this sticks around make it nicer please >:<
     unique_request_string = ""
@@ -53,9 +55,10 @@ def collect_api_responses(execute):
     return wrapper
 
 
-from enum import IntEnum
 import os
 import pickle
+from enum import IntEnum
+from itertools import product
 from pathlib import Path
 from typing import Union
 
@@ -69,7 +72,7 @@ from canarytools.models.base import (APIError, AuthToken, Incidents,
                                      MDeviceIPs, MDevices, MDeviceTxTIPs,
                                      QDeviceIPs, QDevices, QDevicesInfo, Query,
                                      api_auth_token_length)
-from itertools import product
+
 
 class TruthSource(IntEnum):
     # TODO: find a better name please.

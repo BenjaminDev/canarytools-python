@@ -1,66 +1,32 @@
-from functools import singledispatchmethod, wraps
-from typing import (Any, Callable, Collection, Dict, Generic, Mapping, Optional,
-                    Protocol, Tuple, Type, TypeVar, Union, cast, final,
-                    get_origin, runtime_checkable)
+from typing import Type, TypeVar, Union, Dict, Any, Tuple
 
 import httpx
 import pydantic
 from httpx import HTTPError
-from mypy_extensions import KwArg, VarArg
-from pydantic.main import BaseModel
 
 from canarytools._protocols import Execute, Executor, RequestBuilder
-from canarytools.api import api_endpoints, api_version
-from canarytools.models.base import (APIError, AuthToken, Incidents, MDevice,
-                                     MDeviceIPs, MDevices, MDeviceTxTIPs,
-                                     QDeviceIPs, QDevices, Query, QFlocks)
-from canarytools.models.settings import AuthFile, Settings, ThinkstResult
+from canarytools.api import api_endpoints
+from canarytools.models.base import (APIError, AuthFile, AuthToken, Incidents,
+                                MDevice, MDeviceIPs, MDevices, MDeviceTxTIPs,
+                                MFlockSensors, MFlockSettings, MFlockSummary,
+                                QDeviceIPs, QDevices, QFlocks, QIncidentAction,
+                                Query, Settings, SingleIncident, ThinkstResult)
 
 T = TypeVar("T", bound=pydantic.BaseModel)
 import warnings
 from textwrap import dedent
 
-# R = TypeVar('R', bound=httpx.Response)
 from httpx import Response
 from pydantic import ValidationError
 
-# def check_response(
-#     t: Type[T],
-# ) -> Callable[[Callable[..., Union[T, APIError]]], Callable[..., Union[T, APIError]]]:
-#     @wraps
-#     def inner(
-#         f: Callable[..., Union[T, APIError]]
-#     ) -> Callable[..., Union[T, APIError]]:
-#         def wrapper(*args: Any, **kwargs: Any) -> Union[T, APIError]:
-#             response = f(*args, **kwargs)
-#             # breakpoint()
-#             if isinstance(response, APIError):
-#                 return response
-#             # reveal_type(t)
-#             # reveal_type(a)
-#             # if isinstance(response, Response):
-#             #     response_data = t(**response.json())
-#             #     assert isinstance(response_data,t)
-
-#             return t(**response.json())
-#             # return t(**cast(Mapping[str,Any], response.json()))
-#             # return f.__annotations__['return'].__args__[0](**response.json())
-
-#         return cast(Callable[..., Union[T, APIError]], wrapper)
-
-#     return inner
-
-
-warnings.warn("deprecated", DeprecationWarning)
-
 
 def check_response(
-    response: Union[Response, APIError], t: Type[T]
+    response: Union[Response, APIError], return_type: Type[T]
 ) -> Union[T, APIError]:
     if isinstance(response, APIError):
         return response
     try:
-        t(**response.json())
+        return return_type(**response.json())
     except ValidationError as e:
         warnings.warn(
             dedent(
@@ -74,9 +40,6 @@ def check_response(
             stacklevel=2,
         )
         raise
-        # return BaseModel(**response.json())  # type: ignore
-    else:
-        return t(**response.json())
 
 
 # a = check_response(Incidents)
@@ -88,7 +51,6 @@ def check_response(
 
 
 def execute(
-    # self: Executor, #TODO: this
     *,
     verb: str,
     url: str,
@@ -199,12 +161,15 @@ class IncidentActions:
         self.api_version = api_version
         self.api_endpoints = api_endpoints
 
-    def fetch(self) -> Union[Incidents, APIError]:
+    def fetch(self, query: QIncidentAction) -> Union[SingleIncident, APIError]:
         verb, endpoint_name = "get", "incident_fetch"
-        response = IncidentActions.execute(
-            **self.build_request(verb=verb, endpoint_name=endpoint_name)
-        )
-        return check_response(IncidentActions.execute(**response), Incidents)
+        request = self.build_request(verb=verb, endpoint_name=endpoint_name)
+        request["params"].update(**query.dict(exclude_none=True))
+        # reveal_type(t)
+        # request = IncidentActions.execute(
+        #     **self.build_request(verb=verb, endpoint_name=endpoint_name)
+        # )
+        return check_response(IncidentActions.execute(**request), SingleIncident)
 
     # def incident_acknowledge() -> Union[]
 
@@ -306,7 +271,10 @@ class Devices:
             return MDeviceTxTIPs(ips=response.text)
         return check_response(response, MDeviceIPs)
 
+
 from canarytools.models.base import MFlocksSummary
+
+
 class FlockQueries:
     execute: Execute = execute
     build_request: RequestBuilder = build_request
@@ -324,16 +292,29 @@ class FlockQueries:
         self.api_version = api_version
         self.api_endpoints = api_endpoints
 
-    def summaries(self)->MFlocksSummary:
+    def summaries(self) -> Union[MFlocksSummary, APIError]:
         verb, endpoint_name = "get", "flocks_summary"
         request = self.build_request(verb=verb, endpoint_name=endpoint_name)
         return check_response(FlockQueries.execute(**request), MFlocksSummary)
 
-
-    def summary(self, query: QFlocks)->MFlocksSummary:
-        verb, endpoint_name = "get", "flocks_summary"
+    def summary(self, query: QFlocks) -> Union[MFlockSummary, APIError]:
+        verb, endpoint_name = "get", "flock_summary"
         request = self.build_request(verb=verb, endpoint_name=endpoint_name)
-        return check_response(FlockQueries.execute(**request), MFlocksSummary)
+        request["params"].update(**query.dict())
+        return check_response(FlockQueries.execute(**request), MFlockSummary)
+
+    def listicle(self) -> Union[MFlockSensors, APIError]:
+        verb, endpoint_name = "get", "flock_list"
+        request = self.build_request(verb=verb, endpoint_name=endpoint_name)
+        return check_response(FlockQueries.execute(**request), MFlockSensors)
+
+    def settings(self, query: QFlocks) -> Union[MFlockSettings, APIError]:
+        verb, endpoint_name = "get", "flock_settings"
+        request = self.build_request(verb=verb, endpoint_name=endpoint_name)
+        request["params"].update(query.dict())
+        return check_response(FlockQueries.execute(**request), MFlockSettings)
+
+
 # api_endpoints[("get", "flock_list")] = "/flock/list"
 # api_endpoints[("get", "flock_settings")] = "/flock/settings"
 # api_endpoints[("get", "flock_summary")] = "/flock/summary"

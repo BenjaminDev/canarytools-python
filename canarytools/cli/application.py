@@ -1,19 +1,18 @@
+#  type: ignore
 import os
+
+import typer
+from rich.markdown import Markdown
+from rich.panel import Panel
+from rich.table import Table
+from textual import events
+from textual.app import App, RenderableType
+from textual.widgets import Button, Footer, Header, Placeholder, ScrollView
 
 from canarytools.console import Console
 from canarytools.executors import T
 from canarytools.models.base import MFlocksSummary, QDevices, Query
 
-
-import typer
-
-from rich.markdown import Markdown
-from rich.table import Table
-from rich.panel import Panel
-
-from textual import events
-from textual.app import App,RenderableType
-from textual.widgets import Header, Footer, Placeholder, ScrollView, Button
 
 class CanaryHeader(Header):
     def render(self) -> RenderableType:
@@ -29,23 +28,24 @@ class CanaryHeader(Header):
         header = Panel(header_table, style=self.style) if self.tall else header_table
         return header
 
+
 class StatsApp(App):
     """An example of a very simple Textual App
-    FLOCK_STATS = lambda: {
-    'name': '',
-    'live': 0,
-    'dead': 0,
-    'total_tokens': 0,
-    'enabled_tokens': 0,
-    'disabled_tokens': 0,
-    'week_unack': 0,
-    'week_ack': 0,
-    'weekly_total': 0,
-    'completed_updates_total': 0,
-    'pending_updates_total': 0,
-    'week_unacked_incidents': [],
-    'week_acked_incidents': []
-}
+        FLOCK_STATS = lambda: {
+        'name': '',
+        'live': 0,
+        'dead': 0,
+        'total_tokens': 0,
+        'enabled_tokens': 0,
+        'disabled_tokens': 0,
+        'week_unack': 0,
+        'week_ack': 0,
+        'weekly_total': 0,
+        'completed_updates_total': 0,
+        'pending_updates_total': 0,
+        'week_unacked_incidents': [],
+        'week_acked_incidents': []
+    }
 
     """
 
@@ -54,37 +54,37 @@ class StatsApp(App):
         # await self.bind("b", "view.toggle('sidebar')", "Toggle sidebar")
 
         await self.bind("q", "quit", "Quit")
-        self.canaryconsole = Console(console_hash="116482ad", api_key=os.environ["API_KEY"])
+        self.canaryconsole = Console(
+            console_hash="116482ad", api_key=os.environ["API_KEY"]
+        )
         # devices = console.devices.all(query=QDevices())
 
-
     async def on_mount(self, event: events.Mount) -> None:
-        """Create and dock the widgets."""
-
-        # A scrollview to contain the markdown file
         body = ScrollView(gutter=1)
         metrics = ScrollView(gutter=1)
         # Header / footer / dock
         await self.view.dock(CanaryHeader(style="Green"), edge="top")
         await self.view.dock(Footer(), edge="bottom")
-        await self.view.dock(metrics, edge="left", size=30, name="sidebar")
+        # await self.view.dock(metrics, edge="left", size=30, name="sidebar")
 
-        # Dock the body in the remaining space
-        await self.view.dock(body, edge="right")
-
+        await self.view.dock(body, edge="top")
 
         async def get_incidents() -> None:
-            flocks_summary:MFlocksSummary = self.canaryconsole.flocks.summaries()
+            flocks_summary: MFlocksSummary = self.canaryconsole.flocks.summaries()
             flock_ids = list(flocks_summary.flocks_summary.keys())
             md_summary = []
             for flock_id in flock_ids:
                 name = flocks_summary.flocks_summary[flock_id]["name"]
                 offline = flocks_summary.flocks_summary[flock_id]["offline_devices"]
                 online = flocks_summary.flocks_summary[flock_id]["online_devices"]
-                enabled_tokens = flocks_summary.flocks_summary[flock_id]["enabled_tokens"]
-                disabled_tokens = flocks_summary.flocks_summary[flock_id]["disabled_tokens"]
+                enabled_tokens = flocks_summary.flocks_summary[flock_id][
+                    "enabled_tokens"
+                ]
+                disabled_tokens = flocks_summary.flocks_summary[flock_id][
+                    "disabled_tokens"
+                ]
 
-                details = f"# {name}\n__online__: {online}\n__offline__:{offline}\n__enabled_tokens__:{enabled_tokens}\n__disabled tokens__:{disabled_tokens}"
+                details = f"# {name}\n__online__: {online}\n__offline__: {offline}\n__enabled_tokens__: {enabled_tokens}\n__disabled tokens__: {disabled_tokens}"
                 md_summary.append(details)
 
             await body.update(Markdown("\n".join(md_summary)))
@@ -92,16 +92,12 @@ class StatsApp(App):
         await self.call_later(get_incidents)
 
 
-
-
 app = typer.Typer()
 
 
 @app.command()
-def stats(item: str):
-    typer.echo(f"Creating item: {item}")
-    StatsApp.run(title="Canary Stats", log="textual.log")
-
+def stats():
+    StatsApp.run(title="Canary Stats")
 
 
 @app.command()
@@ -113,8 +109,10 @@ def delete(item: str):
 def sell(item: str):
     typer.echo(f"Selling item: {item}")
 
+
 def main():
     app()
+
 
 if __name__ == "__main__":
     SystemExit(main())
