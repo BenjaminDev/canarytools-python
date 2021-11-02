@@ -100,15 +100,6 @@ def stats():
     StatsApp.run(title="Canary Stats")
 
 
-@app.command()
-def delete(item: str):
-    typer.echo(f"Deleting item: {item}")
-
-
-@app.command()
-def sell(item: str):
-    typer.echo(f"Selling item: {item}")
-
 
 def main():
     app()
