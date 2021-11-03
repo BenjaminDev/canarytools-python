@@ -100,7 +100,7 @@ The Python Canary API Wrapper's source (v1.0.0+) is provided under the `Revised 
 
 # Hack Notes: Note API_KEY is example:
 TEST_SOURCE=1 CONSOLE_HASH=116482ad API_KEY=f3d403ec95f5fd43a898c6f12628a8c8 poetry run pytest --cov=canarytools tests/test_console.py --pdb -s
-
+poetry run mypy canarytools 
 
 ```
 ---------- coverage: platform darwin, python 3.9.0-final-0 -----------

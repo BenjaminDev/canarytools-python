@@ -70,7 +70,7 @@ def execute(
 def build_request(
     executor: Executor, *, verb: str, endpoint_name: str
 ) -> Dict[str, Any]:
-    url = f"{executor.base_url}/api/{executor.api_version}/{executor.api_endpoints[(verb, endpoint_name)]}"
+    url = f"{executor.base_url}/api/{executor.api_version}{executor.api_endpoints[(verb, endpoint_name)]}"
     params = executor.auth_token.secret_dict()
     return {"verb": verb, "url": url, "params": params}
 

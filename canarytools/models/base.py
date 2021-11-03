@@ -400,17 +400,6 @@ class MFlocksSummary(BaseModel):
         data["flocks_summary"] = json.dumps(data["flocks_summary"])
         super().__init__(**data)
 
-
-# class MFlockSummary(BaseModel):
-#     different_token_num: int
-#     disabled_tokens: int
-#     incident_count: int
-#     result: str
-#     total_tokens: int
-#     triggered_tokens: int
-#     top_tokens: List[TokenStats]
-
-
 class TokenStats(BaseModel):
     count: int
     kind: str  # TODO: make this an enum
