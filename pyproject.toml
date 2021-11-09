@@ -24,6 +24,7 @@ mypy = "^0.910"
 black = "^21.9b0"
 mkdocs = "^1.2.3"
 mkdocs-material = "^7.3.5"
+wily = "^1.20.0"
 
 
 [tool.poetry.extras]
