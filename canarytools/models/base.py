@@ -13,13 +13,22 @@ import dataclasses
 import json
 import re
 from datetime import datetime
-from typing import (Any, Dict, List, Literal, Mapping, MutableMapping,
-                    Optional, Type, Union)
+from typing import Any, Dict, List, Optional, Union
 
 import httpx
-from pydantic import (BaseModel, Field, FilePath, HttpUrl, IPvAnyAddress, Json,
-                      SecretStr, validator)
+from pydantic import (
+    BaseModel,
+    Field,
+    FilePath,
+    HttpUrl,
+    IPvAnyAddress,
+    Json,
+    NameEmail,
+    SecretStr,
+    validator,
+)
 from pydantic.error_wrappers import ValidationError
+from pydantic.networks import EmailStr
 
 __all__ = [
     "AuthToken",
@@ -118,6 +127,7 @@ class QDeviceIPs(QDevices):
 
 class MDevice(BaseModel):
     device: Json
+
     def __init__(__pydantic_self__, **data: Any) -> None:
         # TODO: Add model details - Json should not be used.
         data["device"] = json.dumps(data["device"])
@@ -145,6 +155,7 @@ class MDevices(BaseModel):
     updated: Optional[str] = None  # datetime#"Sun, 26 Apr 2020 20:34:02 GMT",
     updated_std: Optional[str] = None  # datetime #"2020-04-26 20:34:02 UTC+0000",
     updated_timestamp: Optional[str] = None  # datetime# 1587933242
+
     def __init__(__pydantic_self__, **data: str) -> None:
         # TODO: Add model details - Json should not be used.
         data["devices"] = json.dumps(data["devices"])
@@ -173,7 +184,7 @@ class QIncidentAction(BaseModel):
     tz: Optional[str] = None
 
     @validator("hash_id", pre=True, always=True)
-    def check_hash_id_or_incident(cls, hash_id:str, values:Dict[str, Any])->str:
+    def check_hash_id_or_incident(cls, hash_id: str, values: Dict[str, Any]) -> str:
         if not values.get("incident", False) and hash_id is None:
             raise ValueError("either hash_id or incident is required")
         return hash_id
@@ -382,6 +393,19 @@ class QFlocks(BaseModel):
     flock_id: str = "flock:default"
 
 
+class QFlocksNote(QFlocks):
+    note: str
+
+
+class QFlocksFilter(BaseModel):
+    filter_str: str
+
+
+class QFlocksFor(BaseModel):
+    # TODO: compress these query models?
+    email: EmailStr
+
+
 class MFlockSettings(BaseModel):
     settings: Json  # TODO: add details.
     # Dict[str, MFlockSettingBase]
@@ -400,6 +424,7 @@ class MFlocksSummary(BaseModel):
         data["flocks_summary"] = json.dumps(data["flocks_summary"])
         super().__init__(**data)
 
+
 class TokenStats(BaseModel):
     count: int
     kind: str  # TODO: make this an enum
@@ -413,3 +438,33 @@ class MFlockSummary(ThinkstResult):
     top_tokens: List[TokenStats]
     total_tokens: int
     triggered_tokens: int
+
+
+class MFlockUsers(ThinkstResult):
+
+    managers: List[NameEmail]
+
+    watchers: List[NameEmail]
+
+
+#
+#
+class MFlockMetaData(BaseModel):
+    flock_id: str
+    name: str
+    note: str
+
+
+class MFlocksMetaData(ThinkstResult):
+    flocks: List[MFlockMetaData]
+
+
+class MFlocksList(ThinkstResult):
+    # TODO: remove this model it's not great and it
+    # should be transformed MFlocksMetaData
+    # Sticking with exact api structure for now
+    flocks: Dict[str, str]
+
+
+class MFlockNote(ThinkstResult):
+    note: str

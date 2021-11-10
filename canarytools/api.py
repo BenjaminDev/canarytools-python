@@ -41,6 +41,17 @@ api_endpoints[("get", "flock_list")] = "/flock/list"
 api_endpoints[("get", "flock_settings")] = "/flock/settings"
 api_endpoints[("get", "flock_summary")] = "/flock/summary"
 api_endpoints[("get", "flock_users")] = "/flock/users"
-api_endpoints[("get", "flock_filter")] = "/flock/filter"
+api_endpoints[("get", "flocks_filter")] = "/flocks/filter"
 api_endpoints[("get", "flocks_list")] = "/flocks/list"
 api_endpoints[("get", "flocks_summary")] = "/flocks/summary"
+
+# REF: https://docs.canary.tools/flocks/notes.html#notes
+api_endpoints[("get", "flock_note")] = "/flock/note"
+api_endpoints[("post", "flock_note")] = "/flock/note/add"
+api_endpoints[("delete", "flock_note")] = "/flock/note/delete"
+# GET
+# /api/v1/flock/note
+# POST
+# /api/v1/flock/note/add
+# DELETE
+# /api/v1/flock/note/delete

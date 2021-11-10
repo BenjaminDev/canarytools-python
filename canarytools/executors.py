@@ -1,4 +1,5 @@
-from typing import Type, TypeVar, Union, Dict, Any, Tuple
+import warnings
+from typing import Any, Dict, Tuple, Type, TypeVar, Union
 
 import httpx
 import pydantic
@@ -6,11 +7,34 @@ from httpx import HTTPError
 
 from canarytools._protocols import Execute, Executor, RequestBuilder
 from canarytools.api import api_endpoints
-from canarytools.models.base import (APIError, AuthFile, AuthToken, Incidents,
-                                MDevice, MDeviceIPs, MDevices, MDeviceTxTIPs,
-                                MFlockSensors, MFlockSettings, MFlockSummary,
-                                QDeviceIPs, QDevices, QFlocks, QIncidentAction,
-                                Query, Settings, SingleIncident, ThinkstResult)
+from canarytools.models.base import (
+    APIError,
+    AuthFile,
+    AuthToken,
+    Incidents,
+    MDevice,
+    MDeviceIPs,
+    MDevices,
+    MDeviceTxTIPs,
+    MFlockNote,
+    MFlockSensors,
+    MFlockSettings,
+    MFlocksList,
+    MFlocksMetaData,
+    MFlockSummary,
+    MFlockUsers,
+    QDeviceIPs,
+    QDevices,
+    QFlocks,
+    QFlocksFilter,
+    QFlocksFor,
+    QFlocksNote,
+    QIncidentAction,
+    Query,
+    Settings,
+    SingleIncident,
+    ThinkstResult,
+)
 
 T = TypeVar("T", bound=pydantic.BaseModel)
 import warnings
@@ -40,14 +64,6 @@ def check_response(
             stacklevel=2,
         )
         raise
-
-
-# a = check_response(Incidents)
-# reveal_type(a)
-# b = a("s")
-# reveal_type(b)
-# c = b("sss")
-# reveal_type(c)
 
 
 def execute(
@@ -303,9 +319,10 @@ class FlockQueries:
         request["params"].update(**query.dict())
         return check_response(FlockQueries.execute(**request), MFlockSummary)
 
-    def listicle(self) -> Union[MFlockSensors, APIError]:
+    def list_all(self, query: QFlocks) -> Union[MFlockSensors, APIError]:
         verb, endpoint_name = "get", "flock_list"
         request = self.build_request(verb=verb, endpoint_name=endpoint_name)
+        request["params"].update(query.dict())
         return check_response(FlockQueries.execute(**request), MFlockSensors)
 
     def settings(self, query: QFlocks) -> Union[MFlockSettings, APIError]:
@@ -314,11 +331,42 @@ class FlockQueries:
         request["params"].update(query.dict())
         return check_response(FlockQueries.execute(**request), MFlockSettings)
 
+    def users(self, query: QFlocks) -> Union[MFlockUsers, APIError]:
+        verb, endpoint_name = "get", "flock_users"
+        request = self.build_request(verb=verb, endpoint_name=endpoint_name)
+        request["params"].update(query.dict())
+        return check_response(FlockQueries.execute(**request), MFlockUsers)
 
-# api_endpoints[("get", "flock_list")] = "/flock/list"
-# api_endpoints[("get", "flock_settings")] = "/flock/settings"
-# api_endpoints[("get", "flock_summary")] = "/flock/summary"
+    def filter(self, query: QFlocksFilter) -> Union[MFlocksMetaData, APIError]:
+        verb, endpoint_name = "get", "flocks_filter"
+        request = self.build_request(verb=verb, endpoint_name=endpoint_name)
+        request["params"].update(query.dict())
+        return check_response(FlockQueries.execute(**request), MFlocksMetaData)
 
-# api_endpoints[("get", "flock_users")] = "/flock/users"
-# api_endpoints[("get", "flock_filter")] = "/flock/filter"
-# api_endpoints[("get", "flocks_list")] = "/flocks/list"
+    def list_for(self, query: QFlocksFor) -> Union[MFlocksList, APIError]:
+        verb, endpoint_name = "get", "flocks_list"
+        request = self.build_request(verb=verb, endpoint_name=endpoint_name)
+        request["params"].update(query.dict())
+        return check_response(FlockQueries.execute(**request), MFlocksList)
+
+    def get_note(self, query: QFlocks) -> Union[MFlockNote, APIError]:
+        verb, endpoint_name = "get", "flock_note"
+        request = self.build_request(verb=verb, endpoint_name=endpoint_name)
+        request["params"].update(query.dict())
+        return check_response(FlockQueries.execute(**request), MFlockNote)
+
+    def add_note(self, query: QFlocksNote) -> Union[ThinkstResult, APIError]:
+        verb, endpoint_name = "post", "flock_note"
+        request = self.build_request(verb=verb, endpoint_name=endpoint_name)
+        request["params"].update(query.dict())
+        return check_response(FlockQueries.execute(**request), ThinkstResult)
+
+    def delete_note(self, query: QFlocks) -> Union[ThinkstResult, APIError]:
+        verb, endpoint_name = "delete", "flock_note"
+        request = self.build_request(verb=verb, endpoint_name=endpoint_name)
+        request["params"].update(query.dict())
+        return check_response(FlockQueries.execute(**request), ThinkstResult)
+
+
+# api_endpoints[("post", "flock_note_add"), "/flock/note/add"]
+# api_endpoints[("delete", "flock_note_delete"), "/flock/note/delete"]
